@@ -16,25 +16,47 @@ const pool = mariadb.createPool(POOL);
 
 function getProvince(req, res) {
 
+    pool.getConnection()
+        .then(conn => {
+            console.log('conxecion', conn.threadId);
 
-    pool
-        .query("SELECT * FROM province")
-        .then(rows => {
-            console.log(rows); //[ { 'NOW()': 2018-07-02T17:06:38.000Z }, meta: [ ... ] ]
-            return res.status(200).json({
-                ok: true,
-                rows
-            });
-        })
-        .catch(err => {
+            conn.query("CALL getProvince(?)", 'B')
+                .then(rows => {
+                    console.log(rows); //[ { 'NOW()': 2018-07-02T17:06:38.000Z }, meta: [ ... ] ]
+                    conn.end();
+                    return res.status(200).json({
+                        ok: true,
+                        rows
+                    });
+                })
+                .catch(err => {
 
-            return res.status(200).json({
-                ok: true,
-                err
-            });
+                    return res.status(200).json({
+                        ok: true,
+                        err
+                    });
 
+                });
+
+            // pool
+            // //.query("SELECT * FROM province")
+            //     .query("CALL getProvince(?)", 'B')
+            //     .then(rows => {
+            //         console.log(rows); //[ { 'NOW()': 2018-07-02T17:06:38.000Z }, meta: [ ... ] ]
+            //         res.status(200).json({
+            //             ok: true,
+            //             rows
+            //         });
+            //     })
+            //     .catch(err => {
+
+            //         return res.status(200).json({
+            //             ok: true,
+            //             err
+            //         });
+
+            //     });
         });
-
 
 }
 
